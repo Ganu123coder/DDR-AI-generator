@@ -1,6 +1,7 @@
 import streamlit as st
 from pdf_parser import extract_text_and_images
 from ddr_generator import generate_ddr
+from pdf_parser import extract_text_and_images
 import os
 PORT = int(os.environ.get("PORT", 8501))
 

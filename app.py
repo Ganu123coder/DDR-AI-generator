@@ -31,7 +31,7 @@ if st.button("Generate DDR Report"):
         st.success("DDR Generated!")
 
         st.subheader("📄 Final DDR Report")
-        st.write(report)
+        st.markdown(report, unsafe_allow_html=True)
 
         st.subheader("🖼 Extracted Images")
 

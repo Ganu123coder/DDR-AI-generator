@@ -55,13 +55,25 @@ def safe_generate(prompt):
 # -------------------------------
 # ✅ MAIN FUNCTION
 # -------------------------------
-def generate_ddr(inspection_text, thermal_text):
-    try:
-        prompt = get_prompt(inspection_text, thermal_text)
+def generate_ddr(inspection_text, thermal_text, images):
+    prompt = get_prompt(inspection_text, thermal_text)
 
-        result = safe_generate(prompt)
+    response = safe_generate(prompt)
 
-        return result
+    if not response:
+        return "❌ Failed"
 
-    except Exception as e:
-        return f"❌ Error occurred: {str(e)}"
+    report_text = response
+
+    # 🔥 INSERT IMAGES INTO REPORT
+    html_report = f"<h2>DDR Report</h2><p>{report_text}</p>"
+
+    for img in images:
+        img_base64 = image_to_base64(img)
+        html_report += f"""
+        <br>
+        <img src="data:image/png;base64,{img_base64}" width="400"/>
+        <br>
+        """
+
+    return html_report

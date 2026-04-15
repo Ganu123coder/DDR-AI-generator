@@ -26,7 +26,8 @@ if st.button("Generate DDR Report"):
 
         st.info("Generating AI Report...")
 
-        report = generate_ddr(inspection_text, thermal_text)
+        all_images = inspection_images + thermal_images
+        report = generate_ddr(inspection_text, thermal_text, all_images)
 
         st.success("DDR Generated!")
 

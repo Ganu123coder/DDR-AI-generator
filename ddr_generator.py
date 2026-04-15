@@ -43,19 +43,21 @@ genai.configure(api_key=API_KEY)
 # ✅ SAFE GENERATION FUNCTION
 # -------------------------------
 def safe_generate(prompt):
-    for i in range(3):
-        try:
-            response = client.models.generate_content(
-                model = genai.GenerativeModel("models/gemini-1.5-flash"),
-                contents=prompt
-            )
-            return response
+    print("🔥 PROMPT SIZE:", len(prompt))
 
-        except Exception as e:
-            print(f"⚠️ Retry {i+1}/3 failed:", str(e))
-            time.sleep(2)
+    try:
+        print("🔥 Calling Gemini API...")
 
-    return None
+        response = model.generate_content(prompt)
+
+        print("🔥 RESPONSE SUCCESS")
+        print(response)
+
+        return response
+
+    except Exception as e:
+        print("❌ GEMINI ERROR:", str(e))
+        return None
 
 
 # -------------------------------

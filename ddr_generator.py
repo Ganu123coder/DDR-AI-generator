@@ -46,7 +46,7 @@ def safe_generate(prompt):
     for i in range(3):
         try:
             response = client.models.generate_content(
-                model="gemini-2.5-flash",
+                model = genai.GenerativeModel("models/gemini-1.5-flash"),
                 contents=prompt
             )
             return response

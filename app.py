@@ -1,6 +1,8 @@
 import streamlit as st
 from pdf_parser import extract_text_and_images
 from ddr_generator import generate_ddr
+import os
+PORT = int(os.environ.get("PORT", 8501))
 
 st.set_page_config(page_title="AI DDR Generator", layout="wide")
 

@@ -37,7 +37,7 @@ print("✅ Using GEMINI API KEY:", API_KEY[:10], "...")
 # -------------------------------
 # ✅ INIT GEMINI CLIENT
 # -------------------------------
-client = genai.Client(api_key=API_KEY)
+genai.configure(api_key=API_KEY)
 
 # -------------------------------
 # ✅ SAFE GENERATION FUNCTION

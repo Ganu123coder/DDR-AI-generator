@@ -36,7 +36,7 @@ genai.configure(api_key=API_KEY)
 # -------------------------------
 # ✅ MODEL INIT
 # -------------------------------
-model = genai.GenerativeModel("gemini-2.5-flash")
+model = genai.GenerativeModel("gemini-1.5-flash")
 
 # -------------------------------
 # ✅ SAFE GENERATION FUNCTION

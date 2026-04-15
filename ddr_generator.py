@@ -8,6 +8,9 @@ from prompt_template import get_prompt
 # -------------------------------
 # ✅ LOAD ENV
 # -------------------------------
+def image_to_base64(img):
+    return base64.b64encode(img).decode()
+
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env", override=True)
 

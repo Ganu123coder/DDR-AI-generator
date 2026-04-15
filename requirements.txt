@@ -1,6 +1,6 @@
-streamlit
+streamlit==1.36.0
 google-generativeai==0.8.5
-pymupdf
-python-dotenv
-Pillowcsw
-protobuf<5.0.0
+python-dotenv==1.0.1
+pymupdf==1.24.9
+Pillow==10.4.0
+protobuf==4.25.3

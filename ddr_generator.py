@@ -1,63 +1,55 @@
 import google.generativeai as genai
 import os
+import time
 from dotenv import load_dotenv
 from pathlib import Path
 from prompt_template import get_prompt
-import time
 
 # -------------------------------
-# ✅ FORCE CORRECT .env LOADING
+# ✅ LOAD ENV
 # -------------------------------
 BASE_DIR = Path(__file__).resolve().parent
-ENV_PATH = BASE_DIR / ".env"
+load_dotenv(BASE_DIR / ".env", override=True)
 
-load_dotenv(dotenv_path=ENV_PATH, override=True)
+API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
 
-# -------------------------------
-# ❌ REMOVE CONFLICTING KEYS
-# -------------------------------
-os.environ.pop("GOOGLE_API_KEY", None)
-os.environ.pop("API_KEY", None)
+if not API_KEY:
+    raise ValueError("❌ GEMINI_API_KEY not set")
 
-# -------------------------------
-# ✅ GET CLEAN API KEY
-# -------------------------------
-API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
-
-print("DEBUG KEY:", repr(API_KEY))
+print("✅ API KEY LOADED")
 
 # -------------------------------
-# ❌ VALIDATION
-# -------------------------------
-if not API_KEY or "your_" in API_KEY:
-    raise ValueError("❌ Invalid GEMINI_API_KEY. Fix your .env file")
-
-print("✅ Using GEMINI API KEY:", API_KEY[:10], "...")
-
-# -------------------------------
-# ✅ INIT GEMINI CLIENT
+# ✅ CONFIGURE GEMINI
 # -------------------------------
 genai.configure(api_key=API_KEY)
 
+model = genai.GenerativeModel("gemini-1.5-flash")
+
 # -------------------------------
-# ✅ SAFE GENERATION FUNCTION
+# ✅ SAFE GENERATE (ROBUST VERSION)
 # -------------------------------
 def safe_generate(prompt):
-    print("🔥 PROMPT SIZE:", len(prompt))
-
     try:
-        print("🔥 Calling Gemini API...")
+        # 🔥 LIMIT PROMPT SIZE (VERY IMPORTANT)
+        prompt = prompt[:8000]
+
+        print("📏 Prompt Length:", len(prompt))
 
         response = model.generate_content(prompt)
 
-        print("🔥 RESPONSE SUCCESS")
-        print(response)
+        # 🔥 SAFE RESPONSE PARSING
+        if hasattr(response, "text") and response.text:
+            return response.text
 
-        return response
+        # fallback (sometimes needed)
+        if response.candidates:
+            return response.candidates[0].content.parts[0].text
+
+        return "❌ Empty response from Gemini"
 
     except Exception as e:
         print("❌ GEMINI ERROR:", str(e))
-        return None
+        return f"❌ Gemini API Error: {str(e)}"
 
 
 # -------------------------------
@@ -67,16 +59,9 @@ def generate_ddr(inspection_text, thermal_text):
     try:
         prompt = get_prompt(inspection_text, thermal_text)
 
-        response = safe_generate(prompt)
+        result = safe_generate(prompt)
 
-        if not response:
-            return "❌ API failed after retries"
-
-        # safest response handling
-        if hasattr(response, "text") and response.text:
-            return response.text
-
-        return "❌ Unexpected response format"
+        return result
 
     except Exception as e:
-        return f"❌ Error: {str(e)}"
+        return f"❌ Error occurred: {str(e)}"

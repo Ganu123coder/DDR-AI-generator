@@ -1,39 +1,42 @@
 import google.generativeai as genai
 import os
+import time
 from dotenv import load_dotenv
 from pathlib import Path
 from prompt_template import get_prompt
-import time
 
 # -------------------------------
-# ✅ LOAD .ENV SAFELY
+# ✅ LOAD .ENV PROPERLY
 # -------------------------------
 BASE_DIR = Path(__file__).resolve().parent
 ENV_PATH = BASE_DIR / ".env"
 
-load_dotenv(dotenv_path=ENV_PATH)
+# Load from correct path + override system env if needed
+load_dotenv(dotenv_path=ENV_PATH, override=True)
 
 # -------------------------------
-# ✅ GET API KEY (Render + Local safe)
+# ✅ GET API KEY (LOCAL + RENDER SAFE)
 # -------------------------------
-API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
+API_KEY = os.getenv("GEMINI_API_KEY")
 
-print("DEBUG KEY:", repr(API_KEY))
+print("🔍 DEBUG KEY:", repr(API_KEY))
 
-if not API_KEY or "your_" in API_KEY:
-    raise ValueError("❌ Invalid GEMINI_API_KEY. Set it in Render or .env")
+if not API_KEY or API_KEY.strip() == "":
+    raise ValueError("❌ GEMINI_API_KEY not found. Add it in .env or Render environment variables")
 
-print("✅ Using GEMINI API KEY:", API_KEY[:10], "...")
+API_KEY = API_KEY.strip()
+
+print("✅ GEMINI API KEY LOADED:", API_KEY[:10], "...")
 
 # -------------------------------
-# ✅ CONFIGURE GEMINI (OLD SDK STYLE)
+# ✅ CONFIGURE GEMINI
 # -------------------------------
 genai.configure(api_key=API_KEY)
 
 # -------------------------------
-# ✅ MODEL
+# ✅ MODEL INIT
 # -------------------------------
-model = genai.GenerativeModel("gemini-1.5-flash")
+model = genai.GenerativeModel("gemini-2.5-flash")
 
 # -------------------------------
 # ✅ SAFE GENERATION FUNCTION
@@ -49,23 +52,25 @@ def safe_generate(prompt):
 
     return None
 
-
 # -------------------------------
 # ✅ MAIN FUNCTION
 # -------------------------------
 def generate_ddr(inspection_text, thermal_text):
     try:
+        # Build prompt
         prompt = get_prompt(inspection_text, thermal_text)
 
+        # Generate response
         response = safe_generate(prompt)
 
         if not response:
-            return "❌ API failed after retries"
+            return "❌ API failed after 3 retries"
 
+        # Extract text safely
         if hasattr(response, "text") and response.text:
             return response.text
 
-        return "❌ Unexpected response format"
+        return "❌ Unexpected response format from Gemini API"
 
     except Exception as e:
-        return f"❌ Error: {str(e)}"
+        return f"❌ Error occurred: {str(e)}"

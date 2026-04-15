@@ -11,25 +11,22 @@ from prompt_template import get_prompt
 BASE_DIR = Path(__file__).resolve().parent
 ENV_PATH = BASE_DIR / ".env"
 
-# Load from correct path + override system env if needed
 load_dotenv(dotenv_path=ENV_PATH, override=True)
 
 # -------------------------------
 # ✅ GET API KEY (LOCAL + RENDER SAFE)
 # -------------------------------
-API_KEY = os.getenv("GEMINI_API_KEY")
+API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
 
 print("🔍 DEBUG KEY:", repr(API_KEY))
 
-if not API_KEY or API_KEY.strip() == "":
-    raise ValueError("❌ GEMINI_API_KEY not found. Add it in .env or Render environment variables")
-
-API_KEY = API_KEY.strip()
+if not API_KEY:
+    raise ValueError("❌ GEMINI_API_KEY not found. Set it in .env or Render environment variables")
 
 print("✅ GEMINI API KEY LOADED:", API_KEY[:10], "...")
 
 # -------------------------------
-# ✅ CONFIGURE GEMINI
+# ✅ CONFIGURE GEMINI (OLD SDK - STABLE)
 # -------------------------------
 genai.configure(api_key=API_KEY)
 
@@ -57,16 +54,14 @@ def safe_generate(prompt):
 # -------------------------------
 def generate_ddr(inspection_text, thermal_text):
     try:
-        # Build prompt
         prompt = get_prompt(inspection_text, thermal_text)
 
-        # Generate response
         response = safe_generate(prompt)
 
         if not response:
             return "❌ API failed after 3 retries"
 
-        # Extract text safely
+        # safe output handling
         if hasattr(response, "text") and response.text:
             return response.text
 
